@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "iostream"
+#include <conio.h>
 #include "C:\Users\jeffrey\Desktop\school\333\New folder\rt.h"
 //#include "..\rt.h"
 
@@ -31,12 +32,12 @@ int main( int argc, char *argv[] ) {
 	cout << "Waiting for init data rendezvous" << endl;
 	r_init1.Wait();
 
-	CSemaphore ps1("Prod1",1,1);	// e1 datapool semaphore producer
-	CSemaphore ps2("Prod2",1,1);	// e2 datapool semaphore producer
+	CSemaphore ps1("Prod1",0);	// e1 datapool semaphore producer
+	CSemaphore ps3("Prod3",0);	// e2 datapool semaphore producer
 	//CSemaphore ps3("Prod3",0,1);	// IO pipeline semaphore producer
 
-	CSemaphore cs1("Cons1",1,1);	// e1 datapool semaphore consumer
-	CSemaphore cs2("Cons2",1,1);	// e2 datapool semaphore consumer
+	CSemaphore cs1("Cons1",1);	// e1 datapool semaphore consumer
+	CSemaphore cs3("Cons3",1);	// e2 datapool semaphore consumer
 	//CSemaphore cs3("Cons3",1,1);	// IO pipeline semaphore consumer
 
 	printf("IO Process Creating the Pipeline.....\n") ;
@@ -62,30 +63,33 @@ int main( int argc, char *argv[] ) {
 	//// Waiting for rendezvous
 	//cout << "Waiting for data rendezvous" << endl;
 	//r1.Wait();
-
-	cs1.Wait();
-	// Print off datapool values for e1
-	printf("\nIO Read e1 value for Floor = %d\n", MyDataPool1->floor) ;
-	printf("IO Read e1 value for Direction = %d\n", MyDataPool1->direction) ; 
-	printf("My e1 onNOMOMOMOM  value is = %d\n", MyDataPool1->onNOMOMOMOM) ; 
-	printf("IO Read e1 values for floor array = ") ;
-	for(int i=0; i < 10; i ++)
-		printf("%d ", MyDataPool1->floors[ i ]) ;
-	cout << endl;
-	cs1.Signal();
-
-	cs2.Wait();
-	// Print off datapool values for e2
-	printf("\nIO Read e2 value for Floor = %d\n", MyDataPool2->floor) ;
-	printf("IO Read e2 value for Direction = %d\n", MyDataPool2->direction) ; 
-	printf("My e2 onNOMOMOMOM  value is = %d\n", MyDataPool2->onNOMOMOMOM) ; 
-	printf("IO Read e2 values for floor array = ") ;
-	for(int i=0; i < 10; i ++)
-		printf("%d ", MyDataPool2->floors[ i ]) ;
-	cs2.Signal();
-
-	cout << endl<< endl;
-
+	//detect for keyboard hit
+	while (!_kbhit()) {
+		if (ps1.Read() > 0) {
+			ps1.Wait();
+			// Print off datapool values for e1
+			printf("\nIO Read e1 value for Floor = %d\n", MyDataPool1->floor);
+			printf("IO Read e1 value for Direction = %d\n", MyDataPool1->direction);
+			printf("My e1 onNOMOMOMOM  value is = %d\n", MyDataPool1->onNOMOMOMOM);
+			printf("IO Read e1 values for floor array = ");
+			for (int i = 0; i < 10; i++)
+				printf("%d ", MyDataPool1->floors[i]);
+			cout << endl;
+			cs1.Signal();
+		}
+		if (ps3.Read() > 0) {
+			ps3.Wait();
+			// Print off datapool values for e2
+			printf("\nIO Read e2 value for Floor = %d\n", MyDataPool2->floor);
+			printf("IO Read e2 value for Direction = %d\n", MyDataPool2->direction);
+			printf("My e2 onNOMOMOMOM  value is = %d\n", MyDataPool2->onNOMOMOMOM);
+			printf("IO Read e2 values for floor array = ");
+			for (int i = 0; i < 10; i++)
+				printf("%d ", MyDataPool2->floors[i]);
+			cs3.Signal();
+		}
+	}
+	cout << endl << endl;
 	// Waiting for terminate rendezvous
 	cout << "Waiting for terminate data rendezvous" << endl;
 	r_term.Wait();

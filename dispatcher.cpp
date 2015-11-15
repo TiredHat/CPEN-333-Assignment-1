@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <conio.h>
 #include "iostream"
 #include "C:\Users\jeffrey\Desktop\school\333\New folder\rt.h"
 //#include "..\rt.h"
@@ -28,12 +29,12 @@ struct mypipeline mypip1;
 
 int main ( void ) {
 
-	CSemaphore ps1("Prod1",1,1);	// e1 datapool semaphore producer
-	CSemaphore ps2("Prod2",1,1);	// e2 datapool semaphore producer
+	CSemaphore ps2("Prod2",0);	// e1 datapool semaphore producer
+	CSemaphore ps4("Prod4",0);	// e2 datapool semaphore producer
 	//CSemaphore ps3("Prod3",0,1);	// IO pipeline semaphore producer
 
-	CSemaphore cs1("Cons1",1,1);	// e1 datapool semaphore consumer
-	CSemaphore cs2("Cons2",1,1);	// e2 datapool semaphore consumer
+	CSemaphore cs2("Cons2",1);	// e1 datapool semaphore consumer
+	CSemaphore cs4("Cons4",1);	// e2 datapool semaphore consumer
 	//CSemaphore cs3("Cons3",1,1);	// IO pipeline semaphore consumer
 
 	printf("Dispatcher Process Creating the Pipeline.....\n") ;
@@ -116,28 +117,33 @@ int main ( void ) {
 	//r1.Wait();
 
 //	Sleep(3000);
+	//detect for keyboard hit
 
-	cs1.Wait();
-	// Print off datapool values for e1
-	printf("\nIO Read e1 value for Floor = %d\n", MyDataPool1->floor) ;
-	printf("IO Read e1 value for Direction = %d\n", MyDataPool1->direction) ; 
-	printf("My e1 onNOMOMOMOM  value is = %d\n", MyDataPool1->onNOMOMOMOM) ; 
-	printf("IO Read e1 values for floor array = ") ;
-	for(int i=0; i < 10; i ++)
-		printf("%d ", MyDataPool1->floors[ i ]) ;
-	cs1.Signal();
-	cout << endl;
+	while (!_kbhit()) {
+		if (ps2.Read() > 0) {
+			ps2.Wait();
+			// Print off datapool values for e1
+			printf("\nIO Read e1 value for Floor = %d\n", MyDataPool1->floor);
+			printf("IO Read e1 value for Direction = %d\n", MyDataPool1->direction);
+			printf("My e1 onNOMOMOMOM  value is = %d\n", MyDataPool1->onNOMOMOMOM);
+			printf("IO Read e1 values for floor array = ");
+			for (int i = 0; i < 10; i++)
+				printf("%d ", MyDataPool1->floors[i]);
+			cs2.Signal();
+		}
 
-	cs2.Wait();
-	// Print off datapool values for e2
-	printf("\nIO Read e2 value for Floor = %d\n", MyDataPool2->floor) ;
-	printf("IO Read e2 value for Direction = %d\n", MyDataPool2->direction) ; 
-	printf("My e2 onNOMOMOMOM  value is = %d\n", MyDataPool2->onNOMOMOMOM) ; 
-	printf("IO Read e2 values for floor array = ") ;
-	for(int i=0; i < 10; i ++)
-		printf("%d ", MyDataPool2->floors[ i ]) ;
-	cs2.Signal();
-
+		if (ps4.Read() > 0) {
+			ps4.Wait();
+			// Print off datapool values for e2
+			printf("\nIO Read e2 value for Floor = %d\n", MyDataPool2->floor);
+			printf("IO Read e2 value for Direction = %d\n", MyDataPool2->direction);
+			printf("My e2 onNOMOMOMOM  value is = %d\n", MyDataPool2->onNOMOMOMOM);
+			printf("IO Read e2 values for floor array = ");
+			for (int i = 0; i < 10; i++)
+				printf("%d ", MyDataPool2->floors[i]);
+			cs4.Signal();
+		}
+	}
 	//ps3.Wait();
 	pipe.Read(&mypip1, sizeof(mypip1)) ;	// Read the structure from the pipeline
 	printf("\n\nDispatcher read mystruct.request = %d, mystruct.priority = %d from Pipeline.....\n\n", mypip1.request, mypip1.priority) ;
