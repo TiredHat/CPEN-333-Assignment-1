@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "iostream"
-#include "..\rt.h"
+#include "C:\Users\jeffrey\Desktop\school\333\New folder\rt.h"
+//#include "..\rt.h"
 
 using namespace std;
 
@@ -10,7 +11,8 @@ CRendezvous r1("Rend",4);
 CRendezvous r_term("Termin_Rend",4);
   
 struct 	    mydatapooldata 	{		// start of structure template
-		int floor ;				// floor corresponding to lifts current position
+		int door_status;
+		int floor;			// floor corresponding to lifts current position
 		int direction ;			// direction of travel of lift
 		int onNOMOMOMOM;
 		int floors[10] ;			// an array representing the floors and whether requests are set 
@@ -28,11 +30,11 @@ int main ( void ) {
 
 	CSemaphore ps1("Prod1",1,1);	// e1 datapool semaphore producer
 	CSemaphore ps2("Prod2",1,1);	// e2 datapool semaphore producer
-	CSemaphore ps3("Prod3",0,1);	// IO pipeline semaphore producer
+	//CSemaphore ps3("Prod3",0,1);	// IO pipeline semaphore producer
 
 	CSemaphore cs1("Cons1",1,1);	// e1 datapool semaphore consumer
 	CSemaphore cs2("Cons2",1,1);	// e2 datapool semaphore consumer
-	CSemaphore cs3("Cons3",1,1);	// IO pipeline semaphore consumer
+	//CSemaphore cs3("Cons3",1,1);	// IO pipeline semaphore consumer
 
 	printf("Dispatcher Process Creating the Pipeline.....\n") ;
 	CPipe	pipe("MyPipe", 1024) ;							// Create a pipe 'p1' with the name "MyPipe"
@@ -62,7 +64,7 @@ int main ( void ) {
 //		ACTIVE or SUSPENDED. Default is ACTIVE if not specifie
 
 	cout << "Creating Child Processes....." << endl ;
-	CProcess e1("C:\\Users\\Tim\\Downloads\\CPEN333ASSN1\\Dispatcher\\Debug\\ELEVATOR_1.exe",	// pathlist to child program executable				
+/*	CProcess e1("C:\\Users\\Tim\\Downloads\\CPEN333ASSN1\\Dispatcher\\Debug\\ELEVATOR_1.exe",	// pathlist to child program executable				
 			NORMAL_PRIORITY_CLASS,			// priority
 			OWN_WINDOW,						// process has its own window					
 			SUSPENDED							// process is active immediately
@@ -79,6 +81,24 @@ int main ( void ) {
 			OWN_WINDOW,						// process has its own window					
 			SUSPENDED							// process is active immediately
 	) ;
+*/
+	CProcess e1("C:\\Users\\jeffrey\\Source\\Repos\\CPEN-333-Assignment-1\\ConsoleApplication1\\Debug\\e1.exe",	// pathlist to child program executable				
+		NORMAL_PRIORITY_CLASS,			// priority
+		OWN_WINDOW,						// process has its own window					
+		SUSPENDED							// process is active immediately
+		);
+
+	CProcess e2("C:\\Users\\jeffrey\\Source\\Repos\\CPEN-333-Assignment-1\\ConsoleApplication1\\Debug\\e2.exe",	// pathlist to child program executable				
+		NORMAL_PRIORITY_CLASS,			// priority
+		OWN_WINDOW,						// process has its own window					
+		SUSPENDED							// process is active immediately
+		);
+
+	CProcess io("C:\\Users\\jeffrey\\Source\\Repos\\CPEN-333-Assignment-1\\ConsoleApplication1\\Debug\\io.exe",	// pathlist to child program executable				
+		NORMAL_PRIORITY_CLASS,			// priority
+		OWN_WINDOW,						// process has its own window					
+		SUSPENDED							// process is active immediately
+		);
 
 	e1.Resume();
 	e2.Resume();
@@ -118,10 +138,10 @@ int main ( void ) {
 		printf("%d ", MyDataPool2->floors[ i ]) ;
 	cs2.Signal();
 
-	ps3.Wait();
+	//ps3.Wait();
 	pipe.Read(&mypip1, sizeof(mypip1)) ;	// Read the structure from the pipeline
 	printf("\n\nDispatcher read mystruct.request = %d, mystruct.priority = %d from Pipeline.....\n\n", mypip1.request, mypip1.priority) ;
-	cs3.Signal();
+	//cs3.Signal();
 
 	system("Pause");
 	

@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "iostream"
-#include "..\rt.h"
+#include "C:\Users\jeffrey\Desktop\school\333\New folder\rt.h"
+//#include "..\rt.h"
 
 using namespace std;
 
@@ -10,6 +11,7 @@ CRendezvous r1("Rend",4);
 CRendezvous r_term("Termin_Rend",4);
 
 struct 	mydatapooldata 	{	// start of structure template
+		int door_status;
 		int floor ;			// floor corresponding to lifts current position
 		int direction ;		// direction of travel of lift
 		int onNOMOMOMOM;

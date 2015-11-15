@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "iostream"
-#include "..\rt.h"
+#include "C:\Users\jeffrey\Desktop\school\333\New folder\rt.h"
+//#include "..\rt.h"
 
 using namespace std;
 
@@ -10,6 +11,7 @@ CRendezvous r1("Rend",4);
 CRendezvous r_term("Termin_Rend",4);
 
 struct 	mydatapooldata 	{	// start of structure template
+	    int door_status;
 		int floor ;			// floor corresponding to lifts current position
 		int direction ;		// direction of travel of lift
 		int onNOMOMOMOM;
@@ -31,19 +33,19 @@ int main( int argc, char *argv[] ) {
 
 	CSemaphore ps1("Prod1",1,1);	// e1 datapool semaphore producer
 	CSemaphore ps2("Prod2",1,1);	// e2 datapool semaphore producer
-	CSemaphore ps3("Prod3",0,1);	// IO pipeline semaphore producer
+	//CSemaphore ps3("Prod3",0,1);	// IO pipeline semaphore producer
 
 	CSemaphore cs1("Cons1",1,1);	// e1 datapool semaphore consumer
 	CSemaphore cs2("Cons2",1,1);	// e2 datapool semaphore consumer
-	CSemaphore cs3("Cons3",1,1);	// IO pipeline semaphore consumer
+	//CSemaphore cs3("Cons3",1,1);	// IO pipeline semaphore consumer
 
 	printf("IO Process Creating the Pipeline.....\n") ;
 	CPipe	pipe("MyPipe", 1024) ;							// Create a pipe 'p1' with the name "MyPipe"
 
-	cs3.Wait();
+	//cs3.Wait();
 	printf("Writing struct to pipe from IO to dispatcher with values mystruct.request = %d, mystruct.priority = %d.\n", mypip1.request, mypip1.priority);
 	pipe.Write(&mypip1, sizeof(mypip1)) ;			// write the structure to the pipeline
-	ps3.Signal();
+	//ps3.Signal();
 
 	// IO initializing e1 and e2 datapools
 	printf("IO attempting to create/use the datapool.....\n") ;
