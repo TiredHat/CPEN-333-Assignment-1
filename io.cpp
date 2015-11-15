@@ -16,6 +16,7 @@ struct 	mydatapooldata 	{	// start of structure template
 		int floor ;			// floor corresponding to lifts current position
 		int direction ;		// direction of travel of lift
 		int onNOMOMOMOM;
+		int general_status;
 		int floors[10] ;	// an array representing the floors and whether requests are set 
 } ;	
 
@@ -25,6 +26,7 @@ struct mypipeline {
 } ;
 
 struct mypipeline mypip1 = { 5, 7};
+
 
 int main( int argc, char *argv[] ) {
 
