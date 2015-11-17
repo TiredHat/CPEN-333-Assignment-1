@@ -54,31 +54,173 @@ CDataPool 		dp2("Elevator2", sizeof(struct mydatapooldata));
 struct mydatapooldata 	 *MyDataPool2 = (struct mydatapooldata *)(dp2.LinkDataPool());
 //printf("IO linked to e2 datapool at address %p.....\n", MyDataPool2);
 
+CSemaphore sema_io_console("sema_io_console", 1);
+
+
+
+#define ELEV1_DISPLAYX 1
+#define ELEV2_DISPLAYX 45
+
+
 UINT __stdcall elevator_console(void *args)
 {
 	char str[3];
+	int val[2]; // save str as int
 	while (1) {
 
-		printf("Please enter command \n");
+		sema_io_console.Wait();
+		MOVE_CURSOR(0, 2);
+		printf("Please enter command:\n");
 		str[0] = _getch();
+		// Clears out the enter message
+		MOVE_CURSOR(0, 3);
+		printf("\t\t\t\t\t");
+		MOVE_CURSOR(0, 3);
+		printf("Servicing: %c", str[0] );
 		str[1] = _getch();
 		str[2] = '\0';
-		cout << "Entered: " << str << endl;
+		MOVE_CURSOR(0, 3);
+		printf("\t\t\t\t\t");
+		MOVE_CURSOR(0, 3);
+		printf("Entered: %s\n", str);
+
+		
+		// convert input to integers if valid
+		if ( atoi(&str[1]) && str[1] != '0') {
+			val[1] = atoi(&str[1]);
+		} else if (str[1] == '0' ) {
+			val[1] = 0;
+		}
+
+		MOVE_CURSOR(0, 4);
+		printf("\t\t\t\t\t\t\t\t\t\t");
+		MOVE_CURSOR(0, 4);
 
 		if (!strcmp(str, "ee")) { // exit case
-			cout << "Shutting down elevators" << endl;
+			printf("Shutting down elevators\n");
 			
 			// redezvous type here before the return 0
 			return 0;
 		}
-		else if ( (str[0] == 'u') || (str[0] == 'd') ) { // calling the elevator case
-			cout << "Please wait for the elevator to serve you" << endl;
+		else if ( (str[0] == 'u' && (0 <= val[1] && val[1] < 9)) ||
+					(str[0] == 'd' && (0 < val[1] && val[1] < 10)) ) { // calling the elevator case
+			printf("Please wait, going %c from floor %c\n", str[0],str[1]);
+
+			// !!!!!!!!!Put in code to wait for elevator, lock out of console otherwise 
+			// also detect which elevator is serving u
+		}
+		else if ( (str[0] == '1' || str[0] == '2') && (0 <= val[1] && val[1] < 10) ) { // inside the elevator case
+			printf ( "Closing door, moving elevator %c to floor %c \n", str[0], str[1]);
+		} 
+		else if ((str[0] == '+' || str[0] == '-') && (val[1] == 1 || val[1] == 2)) // servicing elevators and faults
+		{
+			if (!strcmp(str, "+1"))
+			{
+				printf("elevator 1 is in service \n");
+			}
+			else if (!strcmp(str, "-1"))
+			{
+				printf("elevator 1 is out of service \n");
+			}
+			else if (!strcmp(str, "+2"))
+			{
+				printf("elevator 2 is in service \n");
+			}
+			else if (!strcmp(str, "-2"))
+			{
+				printf("elevator 2 is out of service \n");
+			}
+		}
+		else {
+			printf( "INVALID ENTRY!\n" );
 		}
 
+		val[0] = -1; //if val[0] isn't what we want then set it to -1
+		val[1] = -1; //if val[1] isn't what we want then set it to -1
 
+		sema_io_console.Signal();
 
 	}
 }
+
+UINT __stdcall elevator1(void *args) {
+	while (1) {
+		if (ps1.Read() > 0) {
+			ps1.Wait();
+			sema_io_console.Wait();
+			MOVE_CURSOR(ELEV1_DISPLAYX, 10);
+			printf("Elevator 1\n");
+			MOVE_CURSOR(ELEV1_DISPLAYX, 12);
+			printf("\t\t\t\t\t");
+			MOVE_CURSOR(ELEV1_DISPLAYX, 12);
+			if (MyDataPool1->general_status == 0) {
+				printf("- Offline\n");
+			}
+			else {
+				printf("- Online\n");
+			}
+
+			// clears elevator
+			for (int i = 0; i < 10;i++) {
+				MOVE_CURSOR(ELEV1_DISPLAYX, 10 + (13 - i));
+				printf("\t\t\t\t\t");
+			}
+
+			// clears elevator
+			for (int i = 0; i < 10;i++) {
+				MOVE_CURSOR(ELEV1_DISPLAYX, 10 + (13 - i));
+				printf("__ __ F%d", i);
+			}
+
+			// displays elevator location
+			MOVE_CURSOR(ELEV1_DISPLAYX, 10 + (13 - MyDataPool1->floor));
+			printf("[|_|] F%d", MyDataPool1->floor);
+
+			sema_io_console.Signal();
+			cs1.Signal();
+		}
+	}
+}
+
+UINT __stdcall elevator2(void *args) {
+	while (1) {
+		if (ps3.Read() > 0) {
+			ps3.Wait();
+			sema_io_console.Wait();
+			MOVE_CURSOR(ELEV2_DISPLAYX, 10);
+			printf("Elevator 2\n");
+			MOVE_CURSOR(ELEV2_DISPLAYX, 12);
+			printf("\t\t\t\t\t");
+			MOVE_CURSOR(ELEV2_DISPLAYX, 12);
+			if (MyDataPool2->general_status == 0) {
+				printf("- Offline\n");
+			}
+			else {
+				printf("- Online\n");
+			}
+
+			// clears elevator
+			for (int i = 0; i < 10;i++) {
+				MOVE_CURSOR(ELEV2_DISPLAYX, 10 + (13 - i));
+				printf("\t\t\t\t\t");
+			}
+
+			// clears elevator
+			for (int i = 0; i < 10;i++) {
+				MOVE_CURSOR(ELEV2_DISPLAYX, 10 + (13 - i));
+				printf("__ __ F%d", i);
+			}
+
+			// displays elevator location
+			MOVE_CURSOR(ELEV2_DISPLAYX, 10 + (13 - MyDataPool2->floor));
+			printf("[|_|] F%d", MyDataPool2->floor);
+
+			sema_io_console.Signal();
+			cs3.Signal();
+		}
+	}
+}
+
 
 int main( int argc, char *argv[] ) {
 
@@ -145,8 +287,18 @@ int main( int argc, char *argv[] ) {
 		}
 	}
 	*/
+
+
+
+
+
+
 	CThread c1(elevator_console, ACTIVE, NULL);
+	CThread c2(elevator1, ACTIVE, NULL);
+	CThread c3(elevator2, ACTIVE, NULL);
 	c1.WaitForThread();
+	c2.WaitForThread();
+	c3.WaitForThread();
 	cout << endl << endl;
 	// Waiting for terminate rendezvous
 	cout << "Waiting for terminate data rendezvous" << endl;
