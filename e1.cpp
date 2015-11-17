@@ -18,14 +18,25 @@ struct 	mydatapooldata 	{	// start of structure template
 		int onNOMOMOMOM;
 		int general_status;
 		int floors[10] ;	// an array representing the floors and whether requests are set 
-} ;							// end of structure template
+} ;		// end of structure template
+
+CSemaphore ps1("Prod1", 0);	// e1 datapool semaphore producer
+CSemaphore cs1("Cons1", 1);	// e1 datapool semaphore consumer
+
+CSemaphore ps2("Prod2", 0);
+CSemaphore cs2("Cons2", 1);
+
+//printf("e1 attempting to create/use the datapool.....\n");
+CDataPool 		dp("Elevator1", sizeof(struct mydatapooldata));
+
+struct mydatapooldata 	 *MyDataPool = (struct mydatapooldata *)(dp.LinkDataPool());
 
 int main( int argc, char *argv[] ) {
 
 	// Waiting for init rendezvous
 	cout << "Waiting for init data rendezvous" << endl;
 	r_init1.Wait();
-
+/*
 	CSemaphore ps1("Prod1",0);	// e1 datapool semaphore producer
 	CSemaphore cs1("Cons1",1);	// e1 datapool semaphore consumer
 
@@ -36,7 +47,7 @@ int main( int argc, char *argv[] ) {
 	CDataPool 		dp("Elevator1", sizeof(struct mydatapooldata)) ;
 
 	struct mydatapooldata 	 *MyDataPool = (struct mydatapooldata *)(dp.LinkDataPool()) ;
-
+*/
 	//cs1.Wait();
 		cs1.Wait();
 		cs2.Wait();

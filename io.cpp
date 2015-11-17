@@ -28,12 +28,64 @@ struct mypipeline {
 struct mypipeline mypip1 = { 5, 7};
 
 
+CSemaphore ps1("Prod1", 0);	// e1 datapool semaphore producer
+CSemaphore ps3("Prod3", 0);	// e2 datapool semaphore producer
+							//CSemaphore ps3("Prod3",0,1);	// IO pipeline semaphore producer
+
+CSemaphore cs1("Cons1", 1);	// e1 datapool semaphore consumer
+CSemaphore cs3("Cons3", 1);	// e2 datapool semaphore consumer
+							//CSemaphore cs3("Cons3",1,1);	// IO pipeline semaphore consumer
+
+//printf("IO Process Creating the Pipeline.....\n");
+CPipe	pipe("MyPipe", 1024);							// Create a pipe 'p1' with the name "MyPipe"
+														//cs3.Wait();
+//printf("Writing struct to pipe from IO to dispatcher with values mystruct.request = %d, mystruct.priority = %d.\n", mypip1.request, mypip1.priority);
+
+//pipe.Write(&mypip1, sizeof(mypip1));			// write the structure to the pipeline
+												//ps3.Signal();
+
+												// IO initializing e1 and e2 datapools
+//printf("IO attempting to create/use the datapool.....\n");
+CDataPool 		dp1("Elevator1", sizeof(struct mydatapooldata));
+struct mydatapooldata 	 *MyDataPool1 = (struct mydatapooldata *)(dp1.LinkDataPool());
+//printf("IO linked to e1 datapool at address %p.....\n", MyDataPool1);
+
+CDataPool 		dp2("Elevator2", sizeof(struct mydatapooldata));
+struct mydatapooldata 	 *MyDataPool2 = (struct mydatapooldata *)(dp2.LinkDataPool());
+//printf("IO linked to e2 datapool at address %p.....\n", MyDataPool2);
+
+UINT __stdcall elevator_console(void *args)
+{
+	char str[3];
+	while (1) {
+
+		printf("Please enter command \n");
+		str[0] = _getch();
+		str[1] = _getch();
+		str[2] = '\0';
+		cout << "Entered: " << str << endl;
+
+		if (!strcmp(str, "ee")) { // exit case
+			cout << "Shutting down elevators" << endl;
+			
+			// redezvous type here before the return 0
+			return 0;
+		}
+		else if ( (str[0] == 'u') || (str[0] == 'd') ) { // calling the elevator case
+			cout << "Please wait for the elevator to serve you" << endl;
+		}
+
+
+
+	}
+}
+
 int main( int argc, char *argv[] ) {
 
 	// Waiting for init rendezvous
 	cout << "Waiting for init data rendezvous" << endl;
 	r_init1.Wait();
-
+/*
 	CSemaphore ps1("Prod1",0);	// e1 datapool semaphore producer
 	CSemaphore ps3("Prod3",0);	// e2 datapool semaphore producer
 	//CSemaphore ps3("Prod3",0,1);	// IO pipeline semaphore producer
@@ -59,14 +111,15 @@ int main( int argc, char *argv[] ) {
 	CDataPool 		dp2("Elevator2", sizeof(struct mydatapooldata)) ;
 	struct mydatapooldata 	 *MyDataPool2 = (struct mydatapooldata *)(dp2.LinkDataPool()) ;
 	printf("IO linked to e2 datapool at address %p.....\n", MyDataPool2) ;
-
+*/
 //	Sleep(3000);
 
 	//// Waiting for rendezvous
 	//cout << "Waiting for data rendezvous" << endl;
 	//r1.Wait();
 	//detect for keyboard hit
-	while (!_kbhit()) {
+	/*
+		while (!_kbhit()) {
 		if (ps1.Read() > 0) {
 			ps1.Wait();
 			// Print off datapool values for e1
@@ -91,6 +144,9 @@ int main( int argc, char *argv[] ) {
 			cs3.Signal();
 		}
 	}
+	*/
+	CThread c1(elevator_console, ACTIVE, NULL);
+	c1.WaitForThread();
 	cout << endl << endl;
 	// Waiting for terminate rendezvous
 	cout << "Waiting for terminate data rendezvous" << endl;

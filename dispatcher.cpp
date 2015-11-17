@@ -28,8 +28,27 @@ struct mypipeline {
 
 struct mypipeline mypip1;
 
-int main ( void ) {
+CSemaphore ps2("Prod2", 0);	// e1 datapool semaphore producer
+CSemaphore ps4("Prod4", 0);	// e2 datapool semaphore producer
+							//CSemaphore ps3("Prod3",0,1);	// IO pipeline semaphore producer
 
+CSemaphore cs2("Cons2", 1);	// e1 datapool semaphore consumer
+CSemaphore cs4("Cons4", 1);	// e2 datapool semaphore consumer
+							//CSemaphore cs3("Cons3",1,1);	// IO pipeline semaphore consumer
+
+//printf("Dispatcher Process Creating the Pipeline.....\n");
+CPipe	pipe("MyPipe", 1024);							// Create a pipe 'p1' with the name "MyPipe"
+
+//cout << "Dispatcher attempting to create/use the datapool....." << endl;
+CDataPool 		dp1("Elevator1", sizeof(struct mydatapooldata));
+CDataPool 		dp2("Elevator2", sizeof(struct mydatapooldata));
+
+struct mydatapooldata 	 *MyDataPool1 = (struct mydatapooldata *)(dp1.LinkDataPool());
+struct mydatapooldata 	 *MyDataPool2 = (struct mydatapooldata *)(dp2.LinkDataPool());
+
+
+int main ( void ) {
+/*
 	CSemaphore ps2("Prod2",0);	// e1 datapool semaphore producer
 	CSemaphore ps4("Prod4",0);	// e2 datapool semaphore producer
 	//CSemaphore ps3("Prod3",0,1);	// IO pipeline semaphore producer
@@ -50,9 +69,9 @@ int main ( void ) {
 
 	printf("Dispatcher linked to elevator1 dp at address %p.....\n", MyDataPool1) ;
 	printf("Dispatcher linked to elevator2 dp at address %p.....\n", MyDataPool2) ;
+*/
 
-
-	system( "Pause" );
+	//system( "Pause" );
 //	Create process objects p1,p2 and p3. Arguments are as follows
 //	1)	Pathlist to the child process executable i.e. the runnable child program
 //	2)	The process priority. Allowable values are
