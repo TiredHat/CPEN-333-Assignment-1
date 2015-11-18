@@ -11,14 +11,22 @@ CRendezvous r_init1("Init_Rend",4);
 CRendezvous r1("Rend",4);
 CRendezvous r_term("Termin_Rend",4);
 
-struct 	mydatapooldata 	{	// start of structure template
-		int door_status ;			// floor corresponding to lifts current position
-		int floor;
-		int direction ;		// direction of travel of lift
-		int onNOMOMOMOM;
-		int general_status;
-		int floors[10] ;	// an array representing the floors and whether requests are set 
-} ;		// end of structure template
+struct 	mydatapooldata {	// start of structure template
+	int door_status = 0;	// 0 = closed, 1 = open
+	int floor = 0;			// floor corresponding to lifts current position
+	int direction = 0;		// direction of travel of lift, 1=up, 0=down
+	int onNOMOMOMOM;
+	int general_status = 1;	// 0 = out of service, 1 equals ub service
+	int floors[10];	// an array representing the floors and whether requests are set 
+};
+
+
+struct elevpip {
+	int go;
+	int direction;
+	int status;
+};
+struct elevpip elevator1_pipe;
 
 CSemaphore ps1("Prod1", 0);	// e1 datapool semaphore producer
 CSemaphore cs1("Cons1", 1);	// e1 datapool semaphore consumer
@@ -28,6 +36,7 @@ CSemaphore cs2("Cons2", 1);
 
 //printf("e1 attempting to create/use the datapool.....\n");
 CDataPool 		dp("Elevator1", sizeof(struct mydatapooldata));
+CPipe	Elevator_Pipe("elevator1_PIPE", 1024);
 
 struct mydatapooldata 	 *MyDataPool = (struct mydatapooldata *)(dp.LinkDataPool());
 
@@ -36,18 +45,7 @@ int main( int argc, char *argv[] ) {
 	// Waiting for init rendezvous
 	cout << "Waiting for init data rendezvous" << endl;
 	r_init1.Wait();
-/*
-	CSemaphore ps1("Prod1",0);	// e1 datapool semaphore producer
-	CSemaphore cs1("Cons1",1);	// e1 datapool semaphore consumer
 
-	CSemaphore ps2("Prod2", 0);
-	CSemaphore cs2("Cons2", 1);
-
-	printf("e1 attempting to create/use the datapool.....\n") ;
-	CDataPool 		dp("Elevator1", sizeof(struct mydatapooldata)) ;
-
-	struct mydatapooldata 	 *MyDataPool = (struct mydatapooldata *)(dp.LinkDataPool()) ;
-*/
 	//cs1.Wait();
 		cs1.Wait();
 		cs2.Wait();
